@@ -33,10 +33,10 @@ class Container(nagiosplugin.Resource):
         ], encoding="UTF-8", capture_output=True)
 
         if result.returncode != 0:
-            raise Exception(str(result.stderr))
+            raise nagiosplugin.CheckError(str(result.stderr))
 
         if not result.stdout:
-            raise Exception(f"No containers returned by 'docker ps' command")
+            raise nagiosplugin.CheckError(f"No containers named '{self.cnt_name}' returned by 'docker ps' command")
 
         cs = self.parse(result.stdout)
         
@@ -57,7 +57,7 @@ class Container(nagiosplugin.Resource):
                     content = parts[2],
                     is_paused = parts[2].endswith("(Paused)")
                 )
-        raise Exception(f"Container {self.cnt_name} not found")
+        raise nagiosplugin.CheckError(f"Container {self.cnt_name} not found")
 
 
 class ContainerContext(nagiosplugin.Context):
@@ -84,11 +84,15 @@ class ContainerSummary(nagiosplugin.Summary):
         )
 
     def problem(self, results):
-        val = results[0].metric.value
-        return '%s %s' % (
-            val.state,
-            val.content
-        )
+        res = results[0]
+        if res.metric:
+            val = res.metric.value
+            return '%s %s' % (
+                val.state,
+                val.content
+            )
+        else:
+            return str(res)
 
 
 @nagiosplugin.guarded
