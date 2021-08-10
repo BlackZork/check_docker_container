@@ -9,6 +9,8 @@
             "type": "python",
             "request": "launch",
             "program": "check_docker_container.py",
+            "args": [ "-n" , "example_service" ],
+            "justMyCode": false,
             "console": "integratedTerminal"
         }
     ]

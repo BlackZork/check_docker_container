@@ -9,10 +9,9 @@ import re
 import nagiosplugin
 
 class ContainerState:
-    def __init__(self, state: str, exit_code: int,  time: str, is_paused: bool):
+    def __init__(self, state: str, content: str, is_paused: bool):
         self.state = state
-        self.exit_code = None
-        self.time = time
+        self.content = content
         self.is_paused = is_paused
 
 class Container(nagiosplugin.Resource):
@@ -43,7 +42,7 @@ class Container(nagiosplugin.Resource):
         
         return [nagiosplugin.Metric('state', cs, context='container')]
 
-    status_re = re.compile(r"(.+);([a-zA-Z]+) (.*)( \(Paused\))?")
+    status_re = re.compile(r"(.+);([a-zA-Z]+) (.*)")
 
     def parse(self, data):
         for ln in data.splitlines():
@@ -55,8 +54,8 @@ class Container(nagiosplugin.Resource):
             if parts[0] == self.cnt_name:
                 return ContainerState(
                     state = parts[1],
-                    uptime = parts[2],
-                    is_paused = parts[3] is not None
+                    content = parts[2],
+                    is_paused = parts[2].endswith("(Paused)")
                 )
         raise Exception(f"Container {self.cnt_name} not found")
 
@@ -81,14 +80,14 @@ class ContainerSummary(nagiosplugin.Summary):
     def ok(self, results):
         return '%s %s' % (
             results[0].metric.value.state,
-            results[0].metric.value.uptime,
+            results[0].metric.value.content,
         )
 
     def problem(self, results):
         val = results[0].metric.value
         return '%s %s' % (
             val.state,
-            val.uptime
+            val.content
         )
 
 
