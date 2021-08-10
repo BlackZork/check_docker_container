@@ -40,7 +40,7 @@ apply Service for (container_name in host.vars.docker_containers) {
 
 host.conf:
 ```
-object Host "sds.infoklinika.pl" {
+object Host "myhost.com" {
   /* Import the default host template defined in `templates.conf`. */
   import "linux-server"
 
