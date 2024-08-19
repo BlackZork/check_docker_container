@@ -46,9 +46,9 @@ class Container(nagiosplugin.Resource):
 
     def parse(self, data):
         for ln in data.splitlines():
-            match = Container.status_re.match(data)
+            match = Container.status_re.match(ln)
             if not match:
-                raise Exception(f"Cannot parse docker output: {data}")
+                raise Exception(f"Cannot parse docker output line: {ln}")
 
             parts = match.groups()
             if parts[0] == self.cnt_name:
